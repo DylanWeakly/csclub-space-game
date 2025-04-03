@@ -11,7 +11,6 @@ BLACK = (0, 0, 0)
 RED = (200, 0, 0)
 GREEN = (0, 200, 0)
 PLAYER_SPEED = 5
-BULLET_SPEED = 10
 TILE_SIZE = 50
 
 # Initialize Screen
@@ -24,72 +23,96 @@ cowboy_img = pygame.transform.scale(cowboy_img, (50, 50))
 partner_img = pygame.image.load("assets/partner.png")  # Replace with actual image file
 partner_img = pygame.transform.scale(partner_img, (50, 50))
 
-# Maze Layout (1 = Wall, 0 = Path)
-maze = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-    [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# List of Different Mazes for Multiple Levels
+mazes = [
+    [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
+        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+        [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+        [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1],
+        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
+        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+        [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+        [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    # Additional 9 different mazes can be added here as needed
 ]
 
-# Bullet Class
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((10, 5))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect(center=(x, y))
-    
-    def update(self):
-        self.rect.x += BULLET_SPEED
-        if self.rect.x > WIDTH:
-            self.kill()
+level = 0
+maze = mazes[level]
+
+# Find starting position for Cowboy
+def get_start_position():
+    for row_idx, row in enumerate(maze):
+        for col_idx, tile in enumerate(row):
+            if tile == 0:
+                return col_idx * TILE_SIZE, row_idx * TILE_SIZE
+    return 0, 0
+
+start_x, start_y = get_start_position()
 
 # Cowboy Class
 class Cowboy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = cowboy_img
-        self.rect = self.image.get_rect(midbottom=(50, HEIGHT - 100))
+        self.rect = self.image.get_rect(topleft=(start_x, start_y))
         self.speed = PLAYER_SPEED
-        self.bullets = pygame.sprite.Group()
     
     def move(self, keys):
-        new_x, new_y = self.rect.x, self.rect.y
+        dx, dy = 0, 0
         if keys[pygame.K_LEFT]:
-            new_x -= self.speed
+            dx = -self.speed
         if keys[pygame.K_RIGHT]:
-            new_x += self.speed
+            dx = self.speed
         if keys[pygame.K_UP]:
-            new_y -= self.speed
+            dy = -self.speed
         if keys[pygame.K_DOWN]:
-            new_y += self.speed
+            dy = self.speed
         
-        # Collision detection with maze
-        if not self.collides_with_walls(new_x, new_y):
-            self.rect.x, self.rect.y = new_x, new_y
+        # Check if moving out of screen boundaries
+        if self.rect.left + dx < 0:  # Prevent moving left out of screen
+            dx = 0
+        if self.rect.right + dx > WIDTH:  # Prevent moving right out of screen
+            dx = 0
+        if self.rect.top + dy < 0:  # Prevent moving up out of screen
+            dy = 0
+        if self.rect.bottom + dy > HEIGHT:  # Prevent moving down out of screen
+            dy = 0
+        
+        new_rect = self.rect.move(dx, dy)
+        if not self.collides_with_walls(new_rect):
+            self.rect = new_rect
     
-    def collides_with_walls(self, x, y):
+    def collides_with_walls(self, rect):
         for row_idx, row in enumerate(maze):
             for col_idx, tile in enumerate(row):
                 if tile == 1:
                     wall_rect = pygame.Rect(col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-                    if wall_rect.colliderect(pygame.Rect(x, y, 50, 50)):
+                    if rect.colliderect(wall_rect):
                         return True
         return False
     
-    def shoot(self):
-        bullet = Bullet(self.rect.right, self.rect.centery)
-        self.bullets.add(bullet)
-    
     def update(self, keys):
         self.move(keys)
-        self.bullets.update()
 
-# Draw Maze Function
+# Function to Draw Maze
 def draw_maze():
     for row_idx, row in enumerate(maze):
         for col_idx, tile in enumerate(row):
@@ -100,30 +123,33 @@ def draw_maze():
 clock = pygame.time.Clock()
 cowboy = Cowboy()
 all_sprites = pygame.sprite.Group(cowboy)
-partner_rect = partner_img.get_rect(midbottom=(WIDTH - 100, HEIGHT - 100))
+partner_rect = partner_img.get_rect(midbottom=(WIDTH - TILE_SIZE * 2, HEIGHT - TILE_SIZE * 2))
 
 running = True
 while running:
     clock.tick(60)
     screen.fill(WHITE)
-    draw_maze()
     
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            cowboy.shoot()
     
+    draw_maze()
     cowboy.update(keys)
     all_sprites.draw(screen)
-    cowboy.bullets.draw(screen)
     screen.blit(partner_img, partner_rect)
     
-    # Check if Cowboy reaches partner
     if cowboy.rect.colliderect(partner_rect):
-        print("You saved your partner!")
-        running = False
+        print(f"You completed level {level + 1}!")
+        level += 1
+        if level >= len(mazes):
+            print("Game Completed!")
+            running = False
+        else:
+            maze = mazes[level]
+            start_x, start_y = get_start_position()
+            cowboy.rect.topleft = (start_x, start_y)
     
     pygame.display.flip()
 
