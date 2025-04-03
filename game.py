@@ -12,7 +12,7 @@ TILE_SIZE = 50
 
 # Initialize Screen
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Outlaw's Reckoning")
+pygame.display.set_caption("Outlaw's Reckoning - Help the Cowboy save his horse!")
 
 # Load Assets
 cowboy_img = pygame.image.load("assets/cowboy.png")  # Replace with actual image file
@@ -24,7 +24,7 @@ partner_img = pygame.transform.scale(partner_img, (75, 75))
 background_img = pygame.image.load("assets/mojave.png")  # Replace with actual background image file
 background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))  # Scale it to fit the screen
 
-level = 0
+level = 5
 maze = mazes[level]
 
 # Find starting position for Cowboy
@@ -95,11 +95,19 @@ cowboy = Cowboy()
 all_sprites = pygame.sprite.Group(cowboy)
 partner_rect = partner_img.get_rect(midbottom=(WIDTH - TILE_SIZE * 2, HEIGHT - TILE_SIZE * 2))
 
+# Define fonts for the level label and congratulations message
+font = pygame.font.Font(None, 50)
+congrats_font = pygame.font.Font(None, 100)
+
 running = True
 while running:
     clock.tick(60)
     screen.fill("white")  # Clear the screen
     screen.blit(background_img, (0, 0))  # Draw the background image
+    
+    # Render level text at the top-center with a more visible color (e.g., bright yellow)
+    level_text = font.render(f"Level {level + 1} of 6", True, (255, 255, 0))  # Bright yellow color
+    screen.blit(level_text, (WIDTH // 2 - level_text.get_width() // 2, 10))  # Position it at the top-center
     
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
@@ -116,6 +124,11 @@ while running:
         level += 1
         if level >= len(mazes):
             print("Game Completed!")
+            # Displaying the congratulations message
+            congrats_text = congrats_font.render("Congratulations, you beat the game!", True, (0, 255, 0))  # Green color
+            screen.blit(congrats_text, (WIDTH // 2 - congrats_text.get_width() // 2, HEIGHT // 2 - congrats_text.get_height() // 2))
+            pygame.display.flip()
+            pygame.time.wait(2000)  # Wait for 2 seconds before closing
             running = False
         else:
             maze = mazes[level]
