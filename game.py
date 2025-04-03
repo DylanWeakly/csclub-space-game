@@ -1,15 +1,12 @@
 import pygame
 import random
+from mazeSetup import mazes
 
 # Initialize Pygame
 pygame.init()
 
 # Game Constants
 WIDTH, HEIGHT = 800, 600
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (200, 0, 0)
-GREEN = (0, 200, 0)
 PLAYER_SPEED = 5
 TILE_SIZE = 50
 
@@ -20,39 +17,12 @@ pygame.display.set_caption("Outlaw's Reckoning")
 # Load Assets
 cowboy_img = pygame.image.load("assets/cowboy.png")  # Replace with actual image file
 cowboy_img = pygame.transform.scale(cowboy_img, (50, 50))
-partner_img = pygame.image.load("assets/partner.png")  # Replace with actual image file
-partner_img = pygame.transform.scale(partner_img, (50, 50))
+partner_img = pygame.image.load("assets/horse.png")  # Replace with actual image file
+partner_img = pygame.transform.scale(partner_img, (75, 75))
 
-# List of Different Mazes for Multiple Levels
-mazes = [
-    [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    ],
-    [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-        [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-    ],
-    # Additional 9 different mazes can be added here as needed
-]
+# Load the background image
+background_img = pygame.image.load("assets/mojave.png")  # Replace with actual background image file
+background_img = pygame.transform.scale(background_img, (WIDTH, HEIGHT))  # Scale it to fit the screen
 
 level = 0
 maze = mazes[level]
@@ -117,7 +87,7 @@ def draw_maze():
     for row_idx, row in enumerate(maze):
         for col_idx, tile in enumerate(row):
             if tile == 1:
-                pygame.draw.rect(screen, BLACK, (col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+                pygame.draw.rect(screen, "black", (col_idx * TILE_SIZE, row_idx * TILE_SIZE, TILE_SIZE, TILE_SIZE))
 
 # Game Loop
 clock = pygame.time.Clock()
@@ -128,7 +98,8 @@ partner_rect = partner_img.get_rect(midbottom=(WIDTH - TILE_SIZE * 2, HEIGHT - T
 running = True
 while running:
     clock.tick(60)
-    screen.fill(WHITE)
+    screen.fill("white")  # Clear the screen
+    screen.blit(background_img, (0, 0))  # Draw the background image
     
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
